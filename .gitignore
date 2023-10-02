@@ -34,6 +34,7 @@ pnpm-debug.log*
 .expo/
 dist/
 web-build/
+android/
 
 # Native
 *.orig.*

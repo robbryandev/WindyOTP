@@ -1,8 +1,10 @@
 {
   "expo": {
-    "name": "WindyOTP",
-    "slug": "WindyOTP",
+    "name": "windyotp",
+    "displayName": "WindyOTP",
+    "slug": "windyotp",
     "version": "1.0.0",
+    "entrypoint": "./src/index",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -21,7 +23,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "dev.robbryan.windyotp"
     },
     "web": {
       "favicon": "./assets/favicon.png"

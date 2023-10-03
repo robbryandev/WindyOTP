@@ -1,6 +1,8 @@
 language: "Node"
 
 tasks:
+  local:
+    command: "npx expo start --localhost --android"
   android:
     command: "npx expo start --android"
   ios:

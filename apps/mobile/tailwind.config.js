@@ -5,7 +5,8 @@ module.exports = {
     extend: {
       colors: {
         backdrop: "#262626",
-        nav: "#171717"
+        nav: "#171717",
+        txt: "#ffffff"
       }
     },
   },

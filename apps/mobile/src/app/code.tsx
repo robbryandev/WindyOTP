@@ -3,12 +3,14 @@ import { Text, View, Button } from 'react-native';
 import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { BarCodeScanner } from "expo-barcode-scanner";
+import { validTotpUrl } from '../utils/url';
 
 export default function CodePage() {
   const [hasPermission, setHasPermission] = useState<Boolean>(false);
   const [scanned, setScanned] = useState<Boolean>(false);
   const [showCamera, setShowCamera] = useState<Boolean>(false);
   const [showScanButton, setShowScanButton] = useState<Boolean>(true);
+  const [invalidScan, setInvalidScan] = useState<Boolean>(false);
   const [key, setKey] = useState<String>("No key yet");
 
   useEffect(() => {
@@ -19,10 +21,16 @@ export default function CodePage() {
   }, []);
 
   const handleBarCodeScanned = ({ type, data }) => {
-    setScanned(true);
-    setKey(data);
-    setShowCamera(false);
-    setShowScanButton(false);
+    if (validTotpUrl(data)) {
+      setScanned(true);
+      setInvalidScan(false);
+      setKey(data);
+      setShowCamera(false);
+      setShowScanButton(false);
+    }
+    else {
+      setInvalidScan(true);
+    }
   };
 
   const RenderCamera = () => {
@@ -48,6 +56,11 @@ export default function CodePage() {
         </View>
       </View>
       <View className="bg-backdrop min-h-full">
+        {invalidScan ? (
+          <View className='w-full bg-red-500'>
+            <Text className='text-txt text-xl text-center font-semibold py-2'>Invalid TOTP QR Code</Text>
+          </View>
+        ) : null}
         {showScanButton ? (
           <Button title={showCamera ? "cancel" : "scan"} onPress={() => {
             if (hasPermission) {

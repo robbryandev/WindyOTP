@@ -27,7 +27,12 @@
       "package": "dev.robbryan.windyotp"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "build": {
+        "disabled": true
+      }
+    },
+    "plugins": [
+      "expo-router"
+    ]
   }
 }

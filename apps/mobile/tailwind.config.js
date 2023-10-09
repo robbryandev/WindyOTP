@@ -7,7 +7,7 @@ module.exports = {
         backdrop: "#262626",
         nav: "#171717",
         txt: "#ffffff",
-        card: "#525252",
+        card: "#404040",
         progress: "#10b981"
       }
     },

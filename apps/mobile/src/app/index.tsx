@@ -7,6 +7,7 @@ import OtpCard from '../components/OtpCard';
 
 export default function HomePage() {
   const [codes, setCodes] = useState<CodeList>()
+  const [refresh, setRefresh] = useState<number>()
   const getCounter = () => {
     const counterVal = Math.floor(Date.now() / 1000 % 30);
     return counterVal;
@@ -19,7 +20,7 @@ export default function HomePage() {
     }).catch((err) => {
       console.log(err);
     })
-  }, [])
+  }, [refresh])
   // Loop counter interval
   useEffect(() => {
     const timer = setInterval(() => {
@@ -40,7 +41,13 @@ export default function HomePage() {
       <View className="bg-backdrop min-h-full">
         {codes && codes.codes ? Object.keys(codes.codes).map((key: string, index: number) => {
           return (
-            <OtpCard key={index} name={key} data={codes.codes[key]} percentage={100 - ((counter / 30) * 100)} />
+            <OtpCard
+              key={index}
+              name={key}
+              data={codes.codes[key]}
+              percentage={100 - ((counter / 30) * 100)}
+              setRefresh={setRefresh}
+            />
           )
         }) : null}
       </View>

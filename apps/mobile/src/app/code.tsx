@@ -65,11 +65,6 @@ export default function CodePage() {
         </View>
       </View>
       <View className="bg-backdrop min-h-full">
-        <Button title='clear cache' onPress={() => {
-          AsyncStorage.clear().catch((err) => {
-            console.log(err)
-          })
-        }} />
         {codeState.invalid ? (
           <View className='w-full bg-red-500'>
             <Text className='text-txt text-xl text-center font-semibold py-2'>Invalid TOTP QR Code</Text>

@@ -8,7 +8,8 @@ module.exports = {
         nav: "#171717",
         txt: "#ffffff",
         card: "#404040",
-        progress: "#10b981"
+        progress: "#10b981",
+        delete: "#dc2626"
       }
     },
   },

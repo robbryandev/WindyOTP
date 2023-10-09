@@ -1,4 +1,4 @@
-import crypto from "./cryptoNative";
+import { cryptoNative as crypto } from "vanilla-totp"
 import * as exCrypto from 'expo-crypto';
 
 const algorithm = "aes-256-gcm"

@@ -1,6 +1,9 @@
 # extensions
 .history/
 
+# personal
+notes/
+
 # moon
 .moon/cache
 .moon/docker
@@ -12,6 +15,7 @@ node_modules
 /dist
 
 # local env files
+.env
 .env.local
 .env.*.local
 

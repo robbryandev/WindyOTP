@@ -6,7 +6,9 @@ module.exports = {
       colors: {
         backdrop: "#262626",
         nav: "#171717",
-        txt: "#ffffff"
+        txt: "#ffffff",
+        card: "#525252",
+        progress: "#10b981"
       }
     },
   },

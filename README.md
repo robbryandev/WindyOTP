@@ -5,8 +5,8 @@ Made possible using [NativeWind](https://www.nativewind.dev/)
 
 ## Todo
 ### Mobile
-Encrypt totp secret keys
-Add code import / export with bio auth
+- Encrypt totp secret keys
+- Add code import / export with bio auth
 
 ### Site
-Create showcase site with example download
+- Add screenshot to blank phone

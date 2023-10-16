@@ -28,7 +28,8 @@
     "react-native-navigation": "^7.37.0-hotfix.1",
     "react-native-safe-area-context": "4.6.3",
     "react-native-screens": "~3.22.0",
-    "vanilla-totp": "^1.1.2"
+    "vanilla-totp": "^1.1.2",
+    "expo-secure-store": "~12.3.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

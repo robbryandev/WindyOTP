@@ -1,18 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { encrypt, decrypt, type EncryptedCode } from './crypto'
+import { encrypt } from './crypto'
 import * as Device from 'expo-device'
 
 export type CodeList = {
     installDate: number,
     codes: Record<string, string>
-}
-
-export function encryptCode(value: string): EncryptedCode {
-    return encrypt(value)
-}
-
-export function decryptCode(value: EncryptedCode): string {
-    return decrypt(value)
 }
 
 export type AddCodeResult = {
@@ -29,10 +21,8 @@ export function addCode(name: string, value: string): AddCodeResult {
             throw "key not set";
         }
         let codes: CodeList = JSON.parse(res)
-        console.log(`Codes 1: ${JSON.stringify(codes.codes)}`)
-        // codes.codes[name] = JSON.stringify(encryptCode(value))
-        codes.codes[name] = value
-        console.log(`Codes 2: ${JSON.stringify(codes.codes)}`)
+        const key = await encrypt(value)
+        codes.codes[name] = key;
         await AsyncStorage.setItem(Device.modelName, JSON.stringify(codes)).catch((err) => {
             result.error = err
             result.success = false

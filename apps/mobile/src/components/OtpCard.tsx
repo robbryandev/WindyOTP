@@ -1,19 +1,26 @@
-import { View, Text, TouchableOpacity, Pressable } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import StyledButton from "./StyledButton";
 import { getTotp } from "../utils/totp";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Device from "expo-device";
 import { type CodeList } from "../utils/codes";
-import { router } from "expo-router";
-// import { decryptCode } from "../utils/codes";
+import { decrypt } from "../utils/crypto";
 
 export default function OtpCard({ name, data, percentage, setRefresh }: {
     name: string, data: string, percentage: number, setRefresh: CallableFunction
 }) {
     const [showDelete, setShowDelete] = useState<Boolean>(false)
     const [showConfirm, setShowConfirm] = useState<Boolean>(false)
-    const thisCode = getTotp(data);
+    const [thisCode, setThisCode] = useState<string>("error")
+    useEffect(() => {
+        decrypt(data).then((res) => {
+            setThisCode(getTotp(res));
+        }).catch((err) => {
+            console.log(`Failed to decrypt key: ${err}`)
+        })
+    }, [percentage])
+
     return (
         <TouchableOpacity className="w-full h-auto bg-card" onLongPress={() => setShowDelete(true)}>
             <View className="flex flex-row px-4 gap-6">

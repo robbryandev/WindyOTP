@@ -1,32 +1,65 @@
-import { cryptoNative as crypto } from "vanilla-totp"
-import * as exCrypto from 'expo-crypto';
+import { cryptoNative as crypto } from "vanilla-totp";
+import * as expoCrypto from 'expo-crypto';
+import * as Device from "expo-device";
+import * as SecureStore from "expo-secure-store";
 
-const algorithm = "aes-256-gcm"
-const encryptionKey = process.env.EXPO_PUBLIC_ENCRYPTION
-export type EncryptedCode = {
-    iv: string,
-    encryptedData: string,
-    tag: string
+const algorithm = "aes-256-cbc"
+
+export async function clearSecret() {
+    const secureKey = await SecureStore.getItemAsync(Device.modelName + Device.brand);
+    const ivKey = await SecureStore.getItemAsync(Device.modelName + Device.brand + "-iv");
+    if (secureKey) {
+        await SecureStore.deleteItemAsync(Device.modelName + Device.brand);
+    }
+    if (ivKey) {
+        await SecureStore.deleteItemAsync(Device.modelName + Device.brand + "-iv");
+    }
 }
 
-export function encrypt(value: string): EncryptedCode {
-    const iv = Buffer.from(exCrypto.getRandomBytes(16));
-    const cipher = crypto.createCipheriv(algorithm, Buffer.from(encryptionKey, "hex"), iv);
-    const encrypted = Buffer.concat([cipher.update(value, 'utf8'), cipher.final()]);
-    const tag = cipher.getAuthTag();
-
-    return {
-        iv: iv.toString('hex'),
-        encryptedData: encrypted.toString('hex'),
-        tag: tag.toString('hex')
-    };
+async function getSecret(): Promise<Uint8Array> {
+    let asyncKey = Device.modelName + Device.brand;
+    let secureKey = await SecureStore.getItemAsync(asyncKey);
+    if (secureKey) {
+        const secretArray: number[] = Object.values(JSON.parse(secureKey));
+        const unit8Key: Uint8Array = new Uint8Array(secretArray);
+        return unit8Key;
+    } else {
+        const newKey = expoCrypto.getRandomBytes(32)
+        const strSecret = JSON.stringify(newKey);
+        await SecureStore.setItemAsync(asyncKey, strSecret);
+        return newKey;
+    }
 }
 
-export function decrypt(value: EncryptedCode) {
-    const decipher = crypto.createDecipheriv(algorithm, Buffer.from(encryptionKey, 'utf8'), Buffer.from(value.iv, 'hex'));
-    decipher.setAuthTag(Buffer.from(value.tag, 'hex'));
+async function getIv(): Promise<Uint8Array> {
+    let asyncKey = Device.modelName + Device.brand + "-iv";
+    let secureIv = await SecureStore.getItemAsync(asyncKey);
+    if (secureIv) {
+        const ivArray: number[] = Object.values(JSON.parse(secureIv))
+        const unit8Iv: Uint8Array = new Uint8Array(ivArray);
+        return unit8Iv;
+    } else {
+        const newKey = expoCrypto.getRandomBytes(16)
+        const strIv = JSON.stringify(newKey);
+        await SecureStore.setItemAsync(asyncKey, strIv);
+        return newKey;
+    }
+}
 
-    const decrypted = Buffer.concat([decipher.update(value.encryptedData), decipher.final()]);
+export async function encrypt(value: string): Promise<string> {
+    const secret = await getSecret();
+    const iv = await getIv();
+    const secretBuffer = Buffer.from(secret);
+    let cipher = crypto.createCipheriv(algorithm, secretBuffer, iv);
+    let encrypted = cipher.update(value, 'utf8', 'hex') + cipher.final('hex');
+    return encrypted;
+}
 
-    return decrypted.toString('utf8');
+export async function decrypt(value: string): Promise<string> {
+    const secret = await getSecret();
+    const iv = await getIv();
+    const secretBuffer = Buffer.from(secret);
+    let decipher = crypto.createDecipheriv(algorithm, secretBuffer, iv);
+    let decrypted = decipher.update(value, 'hex', 'utf8') + decipher.final('utf8');
+    return decrypted;
 }

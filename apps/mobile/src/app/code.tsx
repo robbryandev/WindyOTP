@@ -6,6 +6,7 @@ import { BarCodeScanner } from "expo-barcode-scanner";
 import { getUrlName, getUrlSecret, validTotpUrl } from '../utils/url';
 import { addCode } from '../utils/codes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { clearSecret } from '../utils/crypto';
 
 type CodeState = {
   permission?: boolean,
@@ -17,7 +18,7 @@ type CodeState = {
 
 export default function CodePage() {
   const [codeState, setCodeState] = useState<CodeState>({ invalid: false, showScan: true, showCamera: false, permission: false })
-
+  const debug = false;
   useEffect(() => {
     (async () => {
       const { status } = await BarCodeScanner.requestPermissionsAsync();
@@ -70,6 +71,22 @@ export default function CodePage() {
             <Text className='text-txt text-xl text-center font-semibold py-2'>Invalid TOTP QR Code</Text>
           </View>
         ) : null}
+        {
+          debug ? (
+            <>
+              <Button title='clear secret' onPress={() => {
+                clearSecret().then(() => {
+                  console.log("cleared secret")
+                }).catch((err) => {
+                  console.log(err)
+                })
+              }} />
+              <Button title='clear cache' onPress={() => {
+                AsyncStorage.clear()
+              }} />
+            </>
+          ) : null
+        }
         {codeState.showScan ? (
           <Button title={codeState.showCamera ? "cancel" : "scan"} onPress={() => {
             if (codeState.permission) {

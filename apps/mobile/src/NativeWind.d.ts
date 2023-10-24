@@ -9,6 +9,7 @@ declare module 'react-native' {
     }
     interface ButtonProps {
         className?: string;
+        text_className?: string;
     }
     interface TouchableOpacityProps {
         className?: string;

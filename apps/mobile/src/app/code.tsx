@@ -1,12 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
-import { Text, View, Button } from 'react-native';
+import { Text, View } from 'react-native';
 import { Link, router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { BarCodeScanner } from "expo-barcode-scanner";
-import { getUrlName, getUrlSecret, validTotpUrl } from '../utils/url';
+import { type TotpData, validTotpUrl, parseTotpUrl, TotpUrl } from '../utils/url';
 import { addCode } from '../utils/codes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { clearSecret } from '../utils/crypto';
+import { StyledButton as Button } from '../components/StyledButton';
 
 type CodeState = {
   permission?: boolean,
@@ -26,23 +27,24 @@ export default function CodePage() {
     })();
   }, []);
 
-  const handleBarCodeScanned = ({ type, data }) => {
-    if (validTotpUrl(data)) {
-      setCodeState({ ...codeState, scanned: true, invalid: false, showCamera: false, showScan: false })
-      const name = getUrlName(data);
-      const secret = getUrlSecret(data);
-      if (name && secret) {
-        const codeRes = addCode(name, secret);
-        console.log(`Success: ${codeRes.success}`)
-        if (codeRes.success) {
-          setTimeout(() => {
-            router.push("/");
-          }, 250)
-        }
-      }
-    }
-    else {
+  const handleBarCodeScanned = ({ type, data }: { type: any, data: string }) => {
+    const totpUrl: TotpUrl | null = validTotpUrl(data)
+    if (!totpUrl) {
       setCodeState({ ...codeState, invalid: true });
+      return
+    }
+    const totpUrlData: TotpData | null = parseTotpUrl(data)
+    if (!totpUrlData) {
+      setCodeState({ ...codeState, invalid: true });
+      return
+    }
+    setCodeState({ ...codeState, scanned: true, invalid: false, showCamera: false, showScan: false })
+    const codeRes = addCode(totpUrlData);
+    console.log(`Success: ${codeRes.success}`)
+    if (codeRes.success) {
+      setTimeout(() => {
+        router.push("/");
+      }, 250)
     }
   };
 
@@ -88,7 +90,7 @@ export default function CodePage() {
           ) : null
         }
         {codeState.showScan ? (
-          <Button title={codeState.showCamera ? "cancel" : "scan"} onPress={() => {
+          <Button title={codeState.showCamera ? "cancel" : "scan"} text_className='text-xl text-center pt-1' className='w-screen h-10 bg-progress' onPress={() => {
             if (codeState.permission) {
               setCodeState({ ...codeState, showCamera: codeState.showCamera === false })
             }

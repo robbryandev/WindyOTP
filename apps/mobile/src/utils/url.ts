@@ -15,7 +15,7 @@ export type TotpData = {
 export type TotpUrl = string
 
 export function validTotpUrl(url: string): TotpUrl | null {
-    const rx = /otpauth:\/\/totp\/(?:[a-zA-Z0-9%]+:)?([^\?]+)\?secret=([0-9A-Za-z]+)/g;
+    const rx = /(apple-|)otpauth:\/\/totp\/(?:[a-zA-Z0-9%]+:)?([^\?]+)\?secret=([0-9A-Za-z]+)/g;
     const success = rx.test(url);
     return success ? url as TotpUrl : null
 }

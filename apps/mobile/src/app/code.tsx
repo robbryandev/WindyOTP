@@ -3,11 +3,13 @@ import { Text, View } from 'react-native';
 import { Link, router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { BarCodeScanner } from "expo-barcode-scanner";
-import { type TotpData, validTotpUrl, parseTotpUrl, TotpUrl } from '../utils/url';
+import { Camera } from 'expo-camera';
+import { type TotpData, validTotpUrl, parseTotpUrl } from '../utils/url';
 import { addCode } from '../utils/codes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { clearSecret } from '../utils/crypto';
 import { StyledButton as Button } from '../components/StyledButton';
+import { type GoogleCode, type GoogleExports, decodeMigration, isMigration, toTotpData } from '../utils/import';
 
 type CodeState = {
   permission?: boolean,
@@ -28,20 +30,45 @@ export default function CodePage() {
   }, []);
 
   const handleBarCodeScanned = ({ type, data }: { type: any, data: string }) => {
-    const totpUrl: TotpUrl | null = validTotpUrl(data)
-    if (!totpUrl) {
+    console.log(data);
+    const codeData: TotpData[] = [];
+    const totpData: TotpData | null = validTotpUrl(data) ? parseTotpUrl(data) : null;
+    const checkMigration = isMigration(data);
+    if (!totpData && !checkMigration) {
       setCodeState({ ...codeState, invalid: true });
       return
     }
-    const totpUrlData: TotpData | null = parseTotpUrl(data)
-    if (!totpUrlData) {
-      setCodeState({ ...codeState, invalid: true });
-      return
+
+    if (checkMigration) {
+      const decodedData = decodeURI(data)
+      console.log(`Decoded: ${decodedData}`)
+      decodeMigration(decodedData).then((migrationCodes: GoogleExports) => {
+        migrationCodes.otpParameters.forEach((thisCode: GoogleCode) => {
+          try {
+            const newData = toTotpData(thisCode)
+            codeData.push(newData);
+          } catch (error) {
+            console.log(`Migration import error: ${error}`)
+          }
+        });
+      }).catch((err) => {
+        console.log(`Migration import error: ${err}`)
+      });
+    } else {
+      codeData.push(totpData)
     }
-    setCodeState({ ...codeState, scanned: true, invalid: false, showCamera: false, showScan: false })
-    const codeRes = addCode(totpUrlData);
-    console.log(`Success: ${codeRes.success}`)
-    if (codeRes.success) {
+
+    let success = true;
+    codeData.forEach((thisCode: TotpData) => {
+      const codeRes = addCode(thisCode);
+      if (!codeRes.success) {
+        success = false;
+      }
+    });
+
+    setCodeState({ ...codeState, scanned: true, invalid: !success, showCamera: false, showScan: false })
+    console.log(`Success: ${success}`)
+    if (success) {
       setTimeout(() => {
         router.push("/");
       }, 250)
@@ -51,7 +78,10 @@ export default function CodePage() {
   const RenderCamera = () => {
     return (
       <View className='overflow-hidden aspect-[1] w-full my-4'>
-        <BarCodeScanner
+        <Camera
+          barCodeScannerSettings={{
+            barCodeTypes: [BarCodeScanner.Constants.BarCodeType.qr],
+          }}
           onBarCodeScanned={codeState.scanned ? undefined : handleBarCodeScanned}
           className='flex-1'
         />
@@ -70,7 +100,7 @@ export default function CodePage() {
       <View className="bg-backdrop min-h-full">
         {codeState.invalid ? (
           <View className='w-full bg-red-500'>
-            <Text className='text-txt text-xl text-center font-semibold py-2'>Invalid TOTP QR Code</Text>
+            <Text className='text-txt text-xl text-center font-semibold py-2'>Unsupported TOTP QR Code</Text>
           </View>
         ) : null}
         {

@@ -33,12 +33,10 @@ export async function getCodes(): Promise<CodeList> {
     let val = await AsyncStorage.getItem(Device.modelName)
     if (!val) {
         val = JSON.stringify(newList);
-        console.log("Code List: " + JSON.stringify(newList))
         await AsyncStorage.setItem(Device.modelName, val).catch((err) => {
             console.log(`set error: ${err}`)
         })
     }
-    console.log("Code List: " + JSON.stringify(JSON.parse(val).codes))
     return JSON.parse(val)
 }
 

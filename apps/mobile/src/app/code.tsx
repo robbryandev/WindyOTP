@@ -30,7 +30,6 @@ export default function CodePage() {
   }, []);
 
   const handleBarCodeScanned = async ({ type, data }: { type: any, data: string }) => {
-    console.log(data);
     const codeData: TotpData[] = [];
     const totpData: TotpData | null = validTotpUrl(data) ? parseTotpUrl(data) : null;
     const checkMigration = isMigration(data);
@@ -41,7 +40,6 @@ export default function CodePage() {
 
     if (checkMigration) {
       const decodedData = decodeURIComponent(data)
-      console.log(`Decoded: ${decodedData}`)
       const migrationCodes: GoogleExports = await decodeMigration(decodedData)
       migrationCodes.otpParameters.forEach((thisCode: GoogleCode) => {
         try {
@@ -56,10 +54,7 @@ export default function CodePage() {
     }
 
     let success = true;
-    console.log(`code count: ${codeData.length}`)
-    addCode(codeData).then(() => {
-      console.log("Added codes");
-    }).catch((err) => {
+    addCode(codeData).catch((err) => {
       console.log(`Error adding codes: ${err}`);
       success = false;
     });

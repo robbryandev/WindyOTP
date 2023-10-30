@@ -31,7 +31,7 @@ export default function HomePage() {
             return (
               <OtpCard
                 key={index}
-                name={key}
+                name={codes.codes[key].account}
                 data={codes.codes[key]}
                 setRefresh={setRefresh}
               />

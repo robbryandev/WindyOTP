@@ -41,3 +41,9 @@ export async function getCodes(): Promise<CodeList> {
     console.log("Code List: " + JSON.stringify(JSON.parse(val).codes))
     return JSON.parse(val)
 }
+
+export async function updateCode(name: string, data: TotpData): Promise<void> {
+    const allCodes = await getCodes();
+    allCodes.codes[name] = { ...data };
+    await AsyncStorage.setItem(Device.modelName, JSON.stringify(allCodes))
+}

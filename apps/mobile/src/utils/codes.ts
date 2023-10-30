@@ -8,32 +8,23 @@ export type CodeList = {
     codes: Record<string, TotpData>
 }
 
-export type AddCodeResult = {
-    error?: string,
-    success: boolean
-}
-
-export function addCode(data: TotpData): AddCodeResult {
-    let result: AddCodeResult = {
-        success: true
+export async function addCode(data: TotpData[]): Promise<void> {
+    const res = await AsyncStorage.getItem(Device.modelName);
+    if (!res) {
+        throw "AddCode Error: key not set"
     }
-    AsyncStorage.getItem(Device.modelName).then(async (res) => {
-        if (!res) {
-            throw "key not set";
-        }
-        let codes: CodeList = JSON.parse(res)
-        const key = await encrypt(data.secret)
-        codes.codes[data.account] = { ...data, secret: key };
-        await AsyncStorage.setItem(Device.modelName, JSON.stringify(codes)).catch((err) => {
-            result.error = err
-            result.success = false
+    let codes: CodeList = JSON.parse(res)
+    data.forEach((codeData: TotpData) => {
+        encrypt(codeData.secret).then((key) => {
+            console.log(`account: ${codeData.account}`)
+            codes.codes[codeData.account] = { ...codeData, secret: key };
+            AsyncStorage.setItem(Device.modelName, JSON.stringify(codes)).then(() => {
+                console.log(`Added account: ${codeData.account}`)
+            }).catch((err) => {
+                console.log(err)
+            })
         })
-    }).catch((err) => {
-        console.log(`AddCode Error: ${err}`)
-        result.error = err
-        result.success = false
     })
-    return result
 }
 
 export async function getCodes(): Promise<CodeList> {
@@ -42,9 +33,11 @@ export async function getCodes(): Promise<CodeList> {
     let val = await AsyncStorage.getItem(Device.modelName)
     if (!val) {
         val = JSON.stringify(newList);
+        console.log("Code List: " + JSON.stringify(newList))
         await AsyncStorage.setItem(Device.modelName, val).catch((err) => {
             console.log(`set error: ${err}`)
         })
     }
+    console.log("Code List: " + JSON.stringify(JSON.parse(val).codes))
     return JSON.parse(val)
 }

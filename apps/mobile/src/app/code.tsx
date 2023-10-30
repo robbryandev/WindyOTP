@@ -21,7 +21,7 @@ type CodeState = {
 
 export default function CodePage() {
   const [codeState, setCodeState] = useState<CodeState>({ invalid: false, showScan: true, showCamera: false, permission: false })
-  const debug = false;
+  const debug = true;
   useEffect(() => {
     (async () => {
       const { status } = await BarCodeScanner.requestPermissionsAsync();
@@ -29,7 +29,7 @@ export default function CodePage() {
     })();
   }, []);
 
-  const handleBarCodeScanned = ({ type, data }: { type: any, data: string }) => {
+  const handleBarCodeScanned = async ({ type, data }: { type: any, data: string }) => {
     console.log(data);
     const codeData: TotpData[] = [];
     const totpData: TotpData | null = validTotpUrl(data) ? parseTotpUrl(data) : null;
@@ -40,30 +40,28 @@ export default function CodePage() {
     }
 
     if (checkMigration) {
-      const decodedData = decodeURI(data)
+      const decodedData = decodeURIComponent(data)
       console.log(`Decoded: ${decodedData}`)
-      decodeMigration(decodedData).then((migrationCodes: GoogleExports) => {
-        migrationCodes.otpParameters.forEach((thisCode: GoogleCode) => {
-          try {
-            const newData = toTotpData(thisCode)
-            codeData.push(newData);
-          } catch (error) {
-            console.log(`Migration import error: ${error}`)
-          }
-        });
-      }).catch((err) => {
-        console.log(`Migration import error: ${err}`)
+      const migrationCodes: GoogleExports = await decodeMigration(decodedData)
+      migrationCodes.otpParameters.forEach((thisCode: GoogleCode) => {
+        try {
+          const newData = toTotpData(thisCode)
+          codeData.push(newData);
+        } catch (error) {
+          console.log(`Migration import error: ${error}`)
+        }
       });
     } else {
       codeData.push(totpData)
     }
 
     let success = true;
-    codeData.forEach((thisCode: TotpData) => {
-      const codeRes = addCode(thisCode);
-      if (!codeRes.success) {
-        success = false;
-      }
+    console.log(`code count: ${codeData.length}`)
+    addCode(codeData).then(() => {
+      console.log("Added codes");
+    }).catch((err) => {
+      console.log(`Error adding codes: ${err}`);
+      success = false;
     });
 
     setCodeState({ ...codeState, scanned: true, invalid: !success, showCamera: false, showScan: false })

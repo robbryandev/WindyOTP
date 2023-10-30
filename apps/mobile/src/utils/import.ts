@@ -69,7 +69,7 @@ export function toTotpData(exportedCode: GoogleCode): TotpData {
 
   let codeAlgorithm: TotpAlgorithm = "sha1";
   if (exportedCode.algorithm != "ALGORITHM_UNSPECIFIED") {
-    codeAlgorithm = exportedCode.algorithm.toLowerCase().replace("algorithm", "") as TotpAlgorithm
+    codeAlgorithm = exportedCode.algorithm.toLowerCase().replace("algorithm_", "") as TotpAlgorithm
   }
 
   return {

@@ -65,7 +65,7 @@ export default function CodePage() {
     if (success) {
       setTimeout(() => {
         router.push("/");
-      }, 250)
+      }, codeData.length * 100)
     }
   };
 

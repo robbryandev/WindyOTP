@@ -51,11 +51,3 @@ export async function encodeGoogleExports(codes: GoogleExports): Promise<Uint8Ar
   const encodedExports = GoogleAuthenticatorImport.encode(GoogleAuthenticatorImport.fromObject(codes)).finish();
   return encodedExports
 }
-
-export function getQrSize(migrationUrl: string): number {
-  let result = 128;
-  while (migrationUrl.length > result) {
-    result *= 2;
-  }
-  return result;
-}

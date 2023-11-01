@@ -5,7 +5,7 @@ import { Text, View, useWindowDimensions } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Link } from 'expo-router';
 
-import { codesToGoogle, encodeGoogleExports, getQrSize } from '../utils/exports';
+import { codesToGoogle, encodeGoogleExports } from '../utils/exports';
 import { type CodeList, getCodes } from '../utils/codes';
 import { type GoogleExports } from '../utils/import';
 

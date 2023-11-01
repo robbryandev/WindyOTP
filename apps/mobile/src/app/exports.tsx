@@ -1,16 +1,18 @@
 import * as LocalAuthentication from 'expo-local-authentication';
+import QRCode from 'react-native-qrcode-svg';
 import { useEffect, useState } from 'react';
-import { Text, View } from 'react-native';
+import { Text, View, useWindowDimensions } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Link } from 'expo-router';
 
+import { codesToGoogle, encodeGoogleExports, getQrSize } from '../utils/exports';
 import { type CodeList, getCodes } from '../utils/codes';
-import { codesToGoogle, encodeGoogleExports } from '../utils/exports';
-import { GoogleExports, decodeMigration } from '../utils/import';
+import { type GoogleExports } from '../utils/import';
 
 export default function ExportsPage() {
+  const { height, width } = useWindowDimensions();
   const [codes, setCodes] = useState<CodeList>()
-  const [exportData, setExportData] = useState<string>()
+  const [exportData, setExportData] = useState<string>("no codes")
   const [permission, setPermission] = useState<Boolean>(false)
   const [supported, setSupported] = useState<Boolean>(false)
 
@@ -33,7 +35,9 @@ export default function ExportsPage() {
           codesToGoogle(Object.values(codes.codes)).then((gCodes: GoogleExports) => {
             encodeGoogleExports(gCodes).then((displayUri) => {
               const displayBuffer = Buffer.from(displayUri)
-              setExportData("otpauth-migration://offline?data=" + displayBuffer.toString("base64"));
+              if (gCodes.otpParameters.length > 0) {
+                setExportData("otpauth-migration://offline?data=" + displayBuffer.toString("base64"));
+              }
             }).catch((displayErr) => {
               console.log("Display Error: " + displayErr)
             })
@@ -58,19 +62,37 @@ export default function ExportsPage() {
         </View>
       </View>
       <View className="bg-backdrop min-h-full">
-        {supported ? (
-          <>
-            <Text className='text-txt'>
-              {permission ? exportData : "Failed to get device permission"}
-            </Text>
-          </>
-        ) : (
-          <>
-            <Text className="text-txt">
-              Your device requires biometric authentication to export your codes
-            </Text>
-          </>
-        )}
+        <View className='p-4'>
+          {supported ? (
+            <>
+              {
+                permission ? (
+                  <>
+                    {
+                      exportData !== "no codes" ? (
+                        <QRCode
+                          value={exportData}
+                          size={width - 32}
+                          quietZone={6}
+                        />
+                      ) : <Text className='text-txt'>You don't have any exportable codes</Text>
+                    }
+                  </>
+                ) : (
+                  <Text className='text-txt'>
+                    Failed to get device permission
+                  </Text>
+                )
+              }
+            </>
+          ) : (
+            <>
+              <Text className="text-txt">
+                Your device requires biometric authentication to export your codes
+              </Text>
+            </>
+          )}
+        </View>
       </View>
       <StatusBar style="auto" />
     </View>

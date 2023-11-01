@@ -6,18 +6,18 @@ import * as SecureStore from "expo-secure-store";
 const algorithm = "aes-256-cbc"
 
 export async function clearSecret() {
-    const secureKey = await SecureStore.getItemAsync(Device.modelName + Device.brand);
-    const ivKey = await SecureStore.getItemAsync(Device.modelName + Device.brand + "-iv");
+    const secureKey = await SecureStore.getItemAsync(Buffer.from(Device.modelName).toString("hex") + Device.brand);
+    const ivKey = await SecureStore.getItemAsync(Buffer.from(Device.modelName).toString("hex") + Device.brand + "-iv");
     if (secureKey) {
-        await SecureStore.deleteItemAsync(Device.modelName + Device.brand);
+        await SecureStore.deleteItemAsync(Buffer.from(Device.modelName).toString("hex") + Device.brand);
     }
     if (ivKey) {
-        await SecureStore.deleteItemAsync(Device.modelName + Device.brand + "-iv");
+        await SecureStore.deleteItemAsync(Buffer.from(Device.modelName).toString("hex") + Device.brand + "-iv");
     }
 }
 
 async function getSecret(): Promise<Uint8Array> {
-    let asyncKey = Device.modelName + Device.brand;
+    let asyncKey = Buffer.from(Device.modelName).toString("hex") + Device.brand;
     let secureKey = await SecureStore.getItemAsync(asyncKey);
     if (secureKey) {
         const secretArray: number[] = Object.values(JSON.parse(secureKey));
@@ -32,7 +32,7 @@ async function getSecret(): Promise<Uint8Array> {
 }
 
 async function getIv(): Promise<Uint8Array> {
-    let asyncKey = Device.modelName + Device.brand + "-iv";
+    let asyncKey = Buffer.from(Device.modelName).toString("hex") + Device.brand + "-iv";
     let secureIv = await SecureStore.getItemAsync(asyncKey);
     if (secureIv) {
         const ivArray: number[] = Object.values(JSON.parse(secureIv))

@@ -3,6 +3,7 @@
     "name": "windyotp",
     "displayName": "WindyOTP",
     "slug": "windyotp",
+    "scheme": "dev.robbryan.otp",
     "version": "1.0.0",
     "entrypoint": "./src/index",
     "orientation": "portrait",

@@ -44,10 +44,18 @@ export async function codesToGoogle(codes: TotpData[]): Promise<GoogleExports> {
   return result;
 }
 
-export async function encodeGoogleExports(codes: GoogleExports) {
+export async function encodeGoogleExports(codes: GoogleExports): Promise<Uint8Array> {
   const getRoot = await protobuf.parse(authBuffer);
   const root = getRoot.root;
   const GoogleAuthenticatorImport = root.lookupType('WindyOTP.GoogleAuthenticatorImport');
   const encodedExports = GoogleAuthenticatorImport.encode(GoogleAuthenticatorImport.fromObject(codes)).finish();
   return encodedExports
+}
+
+export function getQrSize(migrationUrl: string): number {
+  let result = 128;
+  while (migrationUrl.length > result) {
+    result *= 2;
+  }
+  return result;
 }

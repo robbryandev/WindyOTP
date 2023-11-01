@@ -9,16 +9,15 @@ export type CodeList = {
 }
 
 export async function addCode(data: TotpData[]): Promise<void> {
-    const res = await AsyncStorage.getItem(Device.modelName);
+    const res = await AsyncStorage.getItem(Buffer.from(Device.modelName).toString("hex"));
     if (!res) {
         throw "AddCode Error: key not set"
     }
     let codes: CodeList = JSON.parse(res)
     data.forEach((codeData: TotpData) => {
         encrypt(codeData.secret).then((key) => {
-            console.log(`account: ${codeData.account}`)
             codes.codes[codeData.account] = { ...codeData, secret: key };
-            AsyncStorage.setItem(Device.modelName, JSON.stringify(codes)).then(() => {
+            AsyncStorage.setItem(Buffer.from(Device.modelName).toString("hex"), JSON.stringify(codes)).then(() => {
                 console.log(`Added account: ${codeData.account}`)
             }).catch((err) => {
                 console.log(err)
@@ -30,10 +29,10 @@ export async function addCode(data: TotpData[]): Promise<void> {
 export async function getCodes(): Promise<CodeList> {
     const timeStamp: number = new Date().getTime()
     const newList: CodeList = { installDate: timeStamp, codes: {} }
-    let val = await AsyncStorage.getItem(Device.modelName)
+    let val = await AsyncStorage.getItem(Buffer.from(Device.modelName).toString("hex"))
     if (!val) {
         val = JSON.stringify(newList);
-        await AsyncStorage.setItem(Device.modelName, val).catch((err) => {
+        await AsyncStorage.setItem(Buffer.from(Device.modelName).toString("hex"), val).catch((err) => {
             console.log(`set error: ${err}`)
         })
     }
@@ -43,5 +42,5 @@ export async function getCodes(): Promise<CodeList> {
 export async function updateCode(name: string, data: TotpData): Promise<void> {
     const allCodes = await getCodes();
     allCodes.codes[name] = { ...data };
-    await AsyncStorage.setItem(Device.modelName, JSON.stringify(allCodes))
+    await AsyncStorage.setItem(Buffer.from(Device.modelName).toString("hex"), JSON.stringify(allCodes))
 }

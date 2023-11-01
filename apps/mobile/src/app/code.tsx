@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { Text, View } from 'react-native';
+import * as Device from 'expo-device'
 import { Link, router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { BarCodeScanner } from "expo-barcode-scanner";
@@ -21,7 +22,7 @@ type CodeState = {
 
 export default function CodePage() {
   const [codeState, setCodeState] = useState<CodeState>({ invalid: false, showScan: true, showCamera: false, permission: false })
-  const debug = true;
+  const debug = false;
   useEffect(() => {
     (async () => {
       const { status } = await BarCodeScanner.requestPermissionsAsync();

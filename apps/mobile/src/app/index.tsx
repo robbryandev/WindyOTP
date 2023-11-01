@@ -24,6 +24,9 @@ export default function HomePage() {
         <View className="rounded-full bg-backdrop">
           <Link href="/code" className="font-semibold text-3xl text-txt px-4 py-2">+</Link>
         </View>
+        <View className="rounded-full bg-backdrop">
+          <Link href="/exports" className="font-semibold text-3xl text-txt px-4 py-2">{"\u2197"}</Link>
+        </View>
       </View>
       <View className="bg-backdrop min-h-full">
         <ScrollView className='flex flex-grow'>

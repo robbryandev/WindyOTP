@@ -32,7 +32,13 @@
       }
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow WindyOTP to use Face ID."
+        }
+      ]
     ]
   }
 }

@@ -5,27 +5,16 @@ import { StatusBar } from 'expo-status-bar';
 import { Link } from 'expo-router';
 
 import { type CodeList, getCodes } from '../utils/codes';
+import { codesToGoogle, encodeGoogleExports } from '../utils/exports';
+import { GoogleExports, decodeMigration } from '../utils/import';
 
 export default function ExportsPage() {
   const [codes, setCodes] = useState<CodeList>()
+  const [exportData, setExportData] = useState<string>()
   const [permission, setPermission] = useState<Boolean>(false)
   const [supported, setSupported] = useState<Boolean>(false)
 
   useEffect(() => {
-    // Check if device has authentication methods
-    LocalAuthentication.isEnrolledAsync().then((res) => {
-      setSupported(res);
-      if (res) {
-        LocalAuthentication.authenticateAsync({}).then((authRes) => {
-          setPermission(authRes.success);
-        }).catch((authErr) => {
-          console.log(authErr);
-        });
-      }
-    }).catch((err) => {
-      console.log(err);
-    });
-
     // Get codes
     getCodes().then((res: CodeList) => {
       setCodes(res);
@@ -33,6 +22,32 @@ export default function ExportsPage() {
       console.log(err);
     })
   }, [])
+
+  useEffect(() => {
+    // Check if device has authentication methods
+    LocalAuthentication.isEnrolledAsync().then((res) => {
+      setSupported(res);
+      if (res && codes && codes.codes) {
+        LocalAuthentication.authenticateAsync({}).then((authRes) => {
+          setPermission(authRes.success);
+          codesToGoogle(Object.values(codes.codes)).then((gCodes: GoogleExports) => {
+            encodeGoogleExports(gCodes).then((displayUri) => {
+              const displayBuffer = Buffer.from(displayUri)
+              setExportData("otpauth-migration://offline?data=" + displayBuffer.toString("base64"));
+            }).catch((displayErr) => {
+              console.log("Display Error: " + displayErr)
+            })
+          }).catch((gError) => {
+            console.log("gCode error: " + gError);
+          })
+        }).catch((authErr) => {
+          console.log(authErr);
+        });
+      }
+    }).catch((err) => {
+      console.log(err);
+    });
+  }, [codes])
 
   return (
     <View className="min-h-screen pb-80">
@@ -46,7 +61,7 @@ export default function ExportsPage() {
         {supported ? (
           <>
             <Text className='text-txt'>
-              {permission ? "Got device permission" : "Failed to get device permission"}
+              {permission ? exportData : "Failed to get device permission"}
             </Text>
           </>
         ) : (

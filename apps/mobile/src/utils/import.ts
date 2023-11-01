@@ -2,11 +2,14 @@ import * as protobuf from 'protobufjs';
 import { TotpDigits, type TotpData, TotpAlgorithm } from './url';
 import { authBuffer } from '../data/proto';
 
+export type SupportedAlgorithms = "ALGORITHM_UNSPECIFIED" | "ALGORITHM_SHA1" |
+  "ALGORITHM_SHA256" | "ALGORITHM_SHA512" | "ALGORITHM_MD5";
+
 export type GoogleCode = {
   secret: string,
   name: string,
   issuer: string,
-  algorithm: "ALGORITHM_UNSPECIFIED" | "ALGORITHM_SHA1" | "ALGORITHM_SHA256" | "ALGORITHM_SHA512" | "ALGORITHM_MD5",
+  algorithm: SupportedAlgorithms,
   digits: "DIGIT_COUNT_UNSPECIFIED" | "DIGIT_COUNT_SIX" | "DIGIT_COUNT_EIGHT",
   type: "OTP_TYPE_UNSPECIFIED" | "OTP_TYPE_HOTP" | "OTP_TYPE_TOTP",
   counter: string
